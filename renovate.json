@@ -38,5 +38,19 @@
         "automerge"
       ]
     }
-  ]
+  ],
+
+  "allowedCommands": [
+    "^yarn compile$"
+  ],
+
+  "postUpgradeTasks": {
+    "commands": [
+      "yarn compile"
+    ],
+    "fileFilters": [
+      "dist/**"
+    ],
+    "executionMode": "branch"
+  }
 }
