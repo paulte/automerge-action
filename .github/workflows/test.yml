@@ -24,11 +24,11 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
-      - name: Run tests
-        run: yarn test
       - name: Show environment
         run: |
           node --version
           yarn --version
           git --version
           git config --get init.defaultBranch || true
+      - name: Run tests
+        run: yarn test
