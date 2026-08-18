@@ -900,13 +900,13 @@ async function fetchUntilMergeBase(dir, branch, timeout) {
         return commonBase;
       }
     }
-    await fetchDeepen(dir);
+    await fetchDeepen(dir, branch);
   }
   throw new TimeoutError();
 }
 
-async function fetchDeepen(dir) {
-  await git(dir, "fetch", "--quiet", "--deepen", FETCH_DEPTH);
+async function fetchDeepen(dir, branch) {
+  await git(dir, "fetch", "--quiet", "--deepen", FETCH_DEPTH, "origin", branch);
 }
 
 async function mergeBase(dir, ...refs) {
