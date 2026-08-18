@@ -35,4 +35,4 @@ jobs:
           GIT_TRACE: 1
           GIT_TRACE_SETUP: 1
           GIT_TRACE_PACKET: 1
-        run: yarn jest test/git.test.js --runInBand
+        run: yarn jest
