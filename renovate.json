@@ -28,11 +28,15 @@
       "matchUpdateTypes": [
         "patch",
         "minor",
-        "digest"
+        "digest",
+        "pinDigest"
       ],
       "automerge": true,
       "automergeType": "pr",
-      "platformAutomerge": false
+      "platformAutomerge": false,
+      "addLabels": [
+        "automerge"
+      ]
     }
   ]
 }
