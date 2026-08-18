@@ -24,15 +24,7 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
-      - name: Show environment
-        run: |
-          node --version
-          yarn --version
-          git --version
-          git config --get init.defaultBranch || true
-      - name: Run Git tests with tracing
-        env:
-          GIT_TRACE: 1
-          GIT_TRACE_SETUP: 1
-          GIT_TRACE_PACKET: 1
+      - name: Run linting
+        run: yarn lint
+      - name: Run tests
         run: yarn jest
