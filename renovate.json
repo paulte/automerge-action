@@ -22,20 +22,6 @@
     "dependencies"
   ],
 
-  "allowedCommands": [
-    "^yarn compile$"
-  ],
-
-  "postUpgradeTasks": {
-    "commands": [
-      "yarn compile"
-    ],
-    "fileFilters": [
-      "dist/**"
-    ],
-    "executionMode": "branch"
-  },
-
   "packageRules": [
     {
       "description": "Automerge non-major dependency updates",
