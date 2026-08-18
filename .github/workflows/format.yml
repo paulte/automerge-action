@@ -33,28 +33,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
 
-      - name: Check formatting
-        if: github.actor == 'renovate[bot]'
-        run: yarn prettier --check "lib/**/*.js" "test/**/*.js"
-
       - name: Format
-        if: github.actor != 'renovate[bot]'
         run: yarn prettier --write "lib/**/*.js" "test/**/*.js"
 
       - name: Build
         run: yarn compile
 
       - name: Commit formatting and build changes
-        if: github.actor != 'renovate[bot]'
         uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7
         with:
-          commit_message: "style: format with Prettier"
+          commit_message: "style: format with Prettier AND BUILD"
           branch: ${{ github.head_ref }}
-
-      - name: Commit build changes
-        if: github.actor == 'renovate[bot]'
-        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7
-        with:
-          commit_message: "build: update compiled dist"
-          branch: ${{ github.head_ref }}
-          file_pattern: "dist/**"
