@@ -24,9 +24,15 @@ jobs:
           cache: yarn
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
+
       - name: Run linting
         run: yarn lint
+
       - name: Run tests
         run: yarn jest
+
       - name: Build
         run: yarn compile
+
+      - name: Check compiled output
+        run: git diff --exit-code -- dist/
