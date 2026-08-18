@@ -1,4 +1,4 @@
-name: Format
+name: Format and Rebuild
 
 on:
   pull_request:
@@ -34,6 +34,9 @@ jobs:
 
       - name: Format
         run: yarn prettier --write "lib/**/*.js" "test/**/*.js"
+
+      - name: Build
+        run: yarn compile
 
       - name: Commit formatting changes
         uses: stefanzweifel/git-auto-commit-action@v7
