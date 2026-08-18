@@ -9178,7 +9178,17 @@ function mkDirAndCopy (srcMode, src, dest, opts) {
 }
 
 function copyDir (src, dest, opts) {
-  fs.readdirSync(src).forEach(item => copyDirItem(item, src, dest, opts))
+  const dir = fs.opendirSync(src)
+
+  try {
+    let dirent
+
+    while ((dirent = dir.readSync()) !== null) {
+      copyDirItem(dirent.name, src, dest, opts)
+    }
+  } finally {
+    dir.closeSync()
+  }
 }
 
 function copyDirItem (item, src, dest, opts) {
@@ -9211,15 +9221,20 @@ function onLink (destStat, src, dest, opts) {
     if (opts.dereference) {
       resolvedDest = path.resolve(process.cwd(), resolvedDest)
     }
-    if (stat.isSrcSubdir(resolvedSrc, resolvedDest)) {
-      throw new Error(`Cannot copy '${resolvedSrc}' to a subdirectory of itself, '${resolvedDest}'.`)
-    }
+    // If both symlinks resolve to the same target, they are still distinct symlinks
+    // that can be copied/overwritten. Only check subdirectory constraints when
+    // the resolved paths are different.
+    if (resolvedSrc !== resolvedDest) {
+      if (stat.isSrcSubdir(resolvedSrc, resolvedDest)) {
+        throw new Error(`Cannot copy '${resolvedSrc}' to a subdirectory of itself, '${resolvedDest}'.`)
+      }
 
-    // prevent copy if src is a subdir of dest since unlinking
-    // dest in this case would result in removing src contents
-    // and therefore a broken symlink would be created.
-    if (stat.isSrcSubdir(resolvedDest, resolvedSrc)) {
-      throw new Error(`Cannot overwrite '${resolvedDest}' with '${resolvedSrc}'.`)
+      // prevent copy if src is a subdir of dest since unlinking
+      // dest in this case would result in removing src contents
+      // and therefore a broken symlink would be created.
+      if (stat.isSrcSubdir(resolvedDest, resolvedSrc)) {
+        throw new Error(`Cannot overwrite '${resolvedDest}' with '${resolvedSrc}'.`)
+      }
     }
     return copyLink(resolvedSrc, dest)
   }
@@ -9247,6 +9262,7 @@ const { mkdirs } = __nccwpck_require__(8605)
 const { pathExists } = __nccwpck_require__(3835)
 const { utimesMillis } = __nccwpck_require__(2548)
 const stat = __nccwpck_require__(3901)
+const { asyncIteratorConcurrentProcess } = __nccwpck_require__(1860)
 
 async function copy (src, dest, opts = {}) {
   if (typeof opts === 'function') {
@@ -9354,23 +9370,20 @@ async function onDir (srcStat, destStat, src, dest, opts) {
     await fs.mkdir(dest)
   }
 
-  const items = await fs.readdir(src)
+  // iterate through the files in the current directory to copy everything
+  await asyncIteratorConcurrentProcess(await fs.opendir(src), async (item) => {
+    const srcItem = path.join(src, item.name)
+    const destItem = path.join(dest, item.name)
 
-  // loop through the files in the current directory to copy everything
-  await Promise.all(items.map(async item => {
-    const srcItem = path.join(src, item)
-    const destItem = path.join(dest, item)
-
-    // skip the item if it is matches by the filter function
     const include = await runFilter(srcItem, destItem, opts)
-    if (!include) return
-
-    const { destStat } = await stat.checkPaths(srcItem, destItem, 'copy', opts)
-
-    // If the item is a copyable file, `getStatsAndPerformCopy` will copy it
-    // If the item is a directory, `getStatsAndPerformCopy` will call `onDir` recursively
-    return getStatsAndPerformCopy(destStat, srcItem, destItem, opts)
-  }))
+    // only copy the item if it matches the filter function
+    if (include) {
+      const { destStat } = await stat.checkPaths(srcItem, destItem, 'copy', opts)
+      // If the item is a copyable file, `getStatsAndPerformCopy` will copy it
+      // If the item is a directory, `getStatsAndPerformCopy` will call `onDir` recursively
+      await getStatsAndPerformCopy(destStat, srcItem, destItem, opts)
+    }
+  })
 
   if (!destStat) {
     await fs.chmod(dest, srcStat.mode)
@@ -9399,15 +9412,20 @@ async function onLink (destStat, src, dest, opts) {
   if (opts.dereference) {
     resolvedDest = path.resolve(process.cwd(), resolvedDest)
   }
-  if (stat.isSrcSubdir(resolvedSrc, resolvedDest)) {
-    throw new Error(`Cannot copy '${resolvedSrc}' to a subdirectory of itself, '${resolvedDest}'.`)
-  }
+  // If both symlinks resolve to the same target, they are still distinct symlinks
+  // that can be copied/overwritten. Only check subdirectory constraints when
+  // the resolved paths are different.
+  if (resolvedSrc !== resolvedDest) {
+    if (stat.isSrcSubdir(resolvedSrc, resolvedDest)) {
+      throw new Error(`Cannot copy '${resolvedSrc}' to a subdirectory of itself, '${resolvedDest}'.`)
+    }
 
-  // do not copy if src is a subdir of dest since unlinking
-  // dest in this case would result in removing src contents
-  // and therefore a broken symlink would be created.
-  if (stat.isSrcSubdir(resolvedDest, resolvedSrc)) {
-    throw new Error(`Cannot overwrite '${resolvedDest}' with '${resolvedSrc}'.`)
+    // do not copy if src is a subdir of dest since unlinking
+    // dest in this case would result in removing src contents
+    // and therefore a broken symlink would be created.
+    if (stat.isSrcSubdir(resolvedDest, resolvedSrc)) {
+      throw new Error(`Cannot overwrite '${resolvedDest}' with '${resolvedSrc}'.`)
+    }
   }
 
   // copy the link
@@ -9603,14 +9621,14 @@ const { areIdentical } = __nccwpck_require__(3901)
 async function createLink (srcpath, dstpath) {
   let dstStat
   try {
-    dstStat = await fs.lstat(dstpath)
+    dstStat = await fs.lstat(dstpath, { bigint: true })
   } catch {
     // ignore error
   }
 
   let srcStat
   try {
-    srcStat = await fs.lstat(srcpath)
+    srcStat = await fs.lstat(srcpath, { bigint: true })
   } catch (err) {
     err.message = err.message.replace('lstat', 'ensureLink')
     throw err
@@ -9632,11 +9650,11 @@ async function createLink (srcpath, dstpath) {
 function createLinkSync (srcpath, dstpath) {
   let dstStat
   try {
-    dstStat = fs.lstatSync(dstpath)
+    dstStat = fs.lstatSync(dstpath, { bigint: true })
   } catch {}
 
   try {
-    const srcStat = fs.lstatSync(srcpath)
+    const srcStat = fs.lstatSync(srcpath, { bigint: true })
     if (dstStat && areIdentical(srcStat, dstStat)) return
   } catch (err) {
     err.message = err.message.replace('lstat', 'ensureLink')
@@ -9836,12 +9854,31 @@ async function createSymlink (srcpath, dstpath, type) {
   } catch { }
 
   if (stats && stats.isSymbolicLink()) {
-    const [srcStat, dstStat] = await Promise.all([
-      fs.stat(srcpath),
-      fs.stat(dstpath)
-    ])
+    // When srcpath is relative, resolve it relative to dstpath's directory
+    // (standard symlink behavior) or fall back to cwd if that doesn't exist
+    let srcStat
+    if (path.isAbsolute(srcpath)) {
+      srcStat = await fs.stat(srcpath, { bigint: true })
+    } else {
+      const dstdir = path.dirname(dstpath)
+      const relativeToDst = path.join(dstdir, srcpath)
+      try {
+        srcStat = await fs.stat(relativeToDst, { bigint: true })
+      } catch {
+        srcStat = await fs.stat(srcpath, { bigint: true })
+      }
+    }
 
-    if (areIdentical(srcStat, dstStat)) return
+    // Following the existing symlink fails with ENOENT if it's broken; in that
+    // case fall through so fs.symlink reports EEXIST, rather than leaking the
+    // stat ENOENT. Any other error is unexpected, so rethrow it.
+    let dstStat
+    try {
+      dstStat = await fs.stat(dstpath, { bigint: true })
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
+    if (dstStat && areIdentical(srcStat, dstStat)) return
   }
 
   const relative = await symlinkPaths(srcpath, dstpath)
@@ -9862,9 +9899,31 @@ function createSymlinkSync (srcpath, dstpath, type) {
     stats = fs.lstatSync(dstpath)
   } catch { }
   if (stats && stats.isSymbolicLink()) {
-    const srcStat = fs.statSync(srcpath)
-    const dstStat = fs.statSync(dstpath)
-    if (areIdentical(srcStat, dstStat)) return
+    // When srcpath is relative, resolve it relative to dstpath's directory
+    // (standard symlink behavior) or fall back to cwd if that doesn't exist
+    let srcStat
+    if (path.isAbsolute(srcpath)) {
+      srcStat = fs.statSync(srcpath, { bigint: true })
+    } else {
+      const dstdir = path.dirname(dstpath)
+      const relativeToDst = path.join(dstdir, srcpath)
+      try {
+        srcStat = fs.statSync(relativeToDst, { bigint: true })
+      } catch {
+        srcStat = fs.statSync(srcpath, { bigint: true })
+      }
+    }
+
+    // Following the existing symlink fails with ENOENT if it's broken; in that
+    // case fall through so fs.symlinkSync reports EEXIST, rather than leaking the
+    // stat ENOENT. Any other error is unexpected, so rethrow it.
+    let dstStat
+    try {
+      dstStat = fs.statSync(dstpath, { bigint: true })
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
+    if (dstStat && areIdentical(srcStat, dstStat)) return
   }
 
   const relative = symlinkPathsSync(srcpath, dstpath)
@@ -9902,6 +9961,7 @@ const api = [
   'chown',
   'close',
   'copyFile',
+  'cp',
   'fchmod',
   'fchown',
   'fdatasync',
@@ -9909,8 +9969,10 @@ const api = [
   'fsync',
   'ftruncate',
   'futimes',
+  'glob',
   'lchmod',
   'lchown',
+  'lutimes',
   'link',
   'lstat',
   'mkdir',
@@ -9925,6 +9987,7 @@ const api = [
   'rm',
   'rmdir',
   'stat',
+  'statfs',
   'symlink',
   'truncate',
   'unlink',
@@ -9933,6 +9996,8 @@ const api = [
 ].filter(key => {
   // Some commands are not available on some systems. Ex:
   // fs.cp was added in Node.js v16.7.0
+  // fs.statfs was added in Node v19.6.0, v18.15.0
+  // fs.glob was added in Node.js v22.0.0
   // fs.lchown is not available on at least some Linux
   return typeof fs[key] === 'function'
 })
@@ -10455,6 +10520,43 @@ module.exports = {
 
 /***/ }),
 
+/***/ 1860:
+/***/ ((module) => {
+
+"use strict";
+
+
+// https://github.com/jprichardson/node-fs-extra/issues/1056
+// Performing parallel operations on each item of an async iterator is
+// surprisingly hard; you need to have handlers in place to avoid getting an
+// UnhandledPromiseRejectionWarning.
+// NOTE: This function does not presently handle return values, only errors
+async function asyncIteratorConcurrentProcess (iterator, fn) {
+  const promises = []
+  for await (const item of iterator) {
+    promises.push(
+      fn(item).then(
+        () => null,
+        (err) => err ?? new Error('unknown error')
+      )
+    )
+  }
+  await Promise.all(
+    promises.map((promise) =>
+      promise.then((possibleErr) => {
+        if (possibleErr !== null) throw possibleErr
+      })
+    )
+  )
+}
+
+module.exports = {
+  asyncIteratorConcurrentProcess
+}
+
+
+/***/ }),
+
 /***/ 3901:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -10562,7 +10664,10 @@ async function checkParentPaths (src, srcStat, dest, funcName) {
   try {
     destStat = await fs.stat(destParent, { bigint: true })
   } catch (err) {
-    if (err.code === 'ENOENT') return
+    // The destination parent does not exist yet, but a deeper ancestor might
+    // (e.g. when it is a symlink into the source tree). Keep walking up so the
+    // self-subdirectory check is not bypassed.
+    if (err.code === 'ENOENT') return checkParentPaths(src, srcStat, destParent, funcName)
     throw err
   }
 
@@ -10581,7 +10686,10 @@ function checkParentPathsSync (src, srcStat, dest, funcName) {
   try {
     destStat = fs.statSync(destParent, { bigint: true })
   } catch (err) {
-    if (err.code === 'ENOENT') return
+    // The destination parent does not exist yet, but a deeper ancestor might
+    // (e.g. when it is a symlink into the source tree). Keep walking up so the
+    // self-subdirectory check is not bypassed.
+    if (err.code === 'ENOENT') return checkParentPathsSync(src, srcStat, destParent, funcName)
     throw err
   }
   if (areIdentical(srcStat, destStat)) {
@@ -10591,7 +10699,8 @@ function checkParentPathsSync (src, srcStat, dest, funcName) {
 }
 
 function areIdentical (srcStat, destStat) {
-  return destStat.ino && destStat.dev && destStat.ino === srcStat.ino && destStat.dev === srcStat.dev
+  // stat.dev can be 0n on windows when node version >= 22.x.x
+  return destStat.ino !== undefined && destStat.dev !== undefined && destStat.ino === srcStat.ino && destStat.dev === srcStat.dev
 }
 
 // return true if dest is a subdir of src, otherwise false.
@@ -10631,30 +10740,47 @@ const fs = __nccwpck_require__(1176)
 const u = (__nccwpck_require__(9046).fromPromise)
 
 async function utimesMillis (path, atime, mtime) {
-  // if (!HAS_MILLIS_RES) return fs.utimes(path, atime, mtime, callback)
   const fd = await fs.open(path, 'r+')
 
-  let closeErr = null
+  let error = null
 
   try {
     await fs.futimes(fd, atime, mtime)
+  } catch (futimesErr) {
+    error = futimesErr
   } finally {
     try {
       await fs.close(fd)
-    } catch (e) {
-      closeErr = e
+    } catch (closeErr) {
+      if (!error) error = closeErr
     }
   }
 
-  if (closeErr) {
-    throw closeErr
+  if (error) {
+    throw error
   }
 }
 
 function utimesMillisSync (path, atime, mtime) {
   const fd = fs.openSync(path, 'r+')
-  fs.futimesSync(fd, atime, mtime)
-  return fs.closeSync(fd)
+
+  let error = null
+
+  try {
+    fs.futimesSync(fd, atime, mtime)
+  } catch (futimesErr) {
+    error = futimesErr
+  } finally {
+    try {
+      fs.closeSync(fd)
+    } catch (closeErr) {
+      if (!error) error = closeErr
+    }
+  }
+
+  if (error) {
+    throw error
+  }
 }
 
 module.exports = {
@@ -42198,7 +42324,7 @@ const dist_src_Octokit = Octokit.plugin(requestLog, legacyRestEndpointMethods, p
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"automerge-action","version":"0.16.3","description":"GitHub action to automatically merge pull requests","main":"lib/api.js","author":"Pascal","license":"MIT","private":true,"bin":{"automerge-action":"./bin/automerge.js"},"scripts":{"test":"jest","it":"node it/it.js","lint":"prettier -l lib/** test/** && eslint .","compile":"ncc build bin/automerge.js --license LICENSE -o dist","prepublish":"yarn lint && yarn test && yarn compile"},"dependencies":{"@actions/core":"^1.10.1","@octokit/rest":"^22.0.1","argparse":"^2.0.1","fs-extra":"^11.2.0","object-resolve-path":"^1.1.1","tmp":"^0.2.3"},"devDependencies":{"@vercel/ncc":"^0.38.1","dotenv":"^17.4.2","eslint":"^9.0.0","eslint-plugin-jest":"^28.2.0","globals":"^15.0.0","jest":"^29.7.0","prettier":"^3.2.5"},"prettier":{"trailingComma":"none","arrowParens":"avoid"}}');
+module.exports = JSON.parse('{"name":"automerge-action","version":"0.16.3","description":"GitHub action to automatically merge pull requests","main":"lib/api.js","author":"Pascal","license":"MIT","private":true,"bin":{"automerge-action":"./bin/automerge.js"},"scripts":{"test":"jest","it":"node it/it.js","lint":"prettier -l lib/** test/** && eslint .","compile":"ncc build bin/automerge.js --license LICENSE -o dist","prepublish":"yarn lint && yarn test && yarn compile"},"dependencies":{"@actions/core":"^1.10.1","@octokit/rest":"^22.0.1","argparse":"^2.0.1","fs-extra":"^11.4.0","object-resolve-path":"^1.1.1","tmp":"^0.2.3"},"devDependencies":{"@vercel/ncc":"^0.38.1","dotenv":"^17.4.2","eslint":"^9.0.0","eslint-plugin-jest":"^28.2.0","globals":"^15.0.0","jest":"^29.7.0","prettier":"^3.2.5"},"prettier":{"trailingComma":"none","arrowParens":"avoid"}}');
 
 /***/ })
 
