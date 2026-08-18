@@ -29,10 +29,8 @@ jobs:
         with:
           node-version: 20
           cache: yarn
-
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
+        run: yarn install --frozen-lockfile --ignore-scripts
       - name: Format
         run: yarn prettier --write "lib/**/*.js" "test/**/*.js"
 
