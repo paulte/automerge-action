@@ -46,7 +46,12 @@ jobs:
         run: yarn install --ignore-scripts
 
       - name: Format
-        run: yarn prettier --write "lib/**/*.js" "test/**/*.js"
+        run: |
+          yarn prettier --write \
+            "lib/**/*.js" \
+            "test/**/*.js" \
+            "**/*.{json,yml,yaml,md}" \
+            "!dist/**"
 
       - name: Build
         run: yarn compile
@@ -102,7 +107,12 @@ jobs:
           node -p "require.resolve('@eslint/js')"
 
       - name: Check formatting
-        run: yarn prettier --check "lib/**/*.js" "test/**/*.js"
+        run: |
+          yarn prettier --check \
+            "lib/**/*.js" \
+            "test/**/*.js" \
+            "**/*.{json,yml,yaml,md}" \
+            "!dist/**"
 
       - name: Run linting
         run: yarn lint
