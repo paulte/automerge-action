@@ -99,13 +99,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --ignore-scripts
 
-      # Keep the diagnostic from the original ESLint 10 failure.
-      - name: Debug ESLint dependencies
-        run: |
-          yarn why @eslint/js
-          ls -la node_modules/@eslint/js
-          node -p "require.resolve('@eslint/js')"
-
       - name: Check formatting
         run: |
           yarn prettier --check \
