@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --ignore-scripts
 
-      - name: Format
+      - name: Format fixing
         run: yarn prettier --write "lib/**/*.js" "test/**/*.js"
 
       - name: Build
