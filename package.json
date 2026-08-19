@@ -1,9 +1,9 @@
 {
   "name": "automerge-action",
-  "version": "0.16.3",
+  "version": "1.0.1",
   "description": "GitHub action to automatically merge pull requests",
   "main": "lib/api.js",
-  "author": "Pascal",
+  "author": "paulte",
   "license": "MIT",
   "private": true,
   "bin": {
