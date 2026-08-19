@@ -335,7 +335,7 @@ This repository is designed to automate the approval and maintenance of routine 
 - **Dependabot security updates** remain enabled through GitHub to identify and propose fixes for vulnerable dependencies.
 - **CodeQL** performs static security analysis to identify potential vulnerabilities.
 - **Sourcery** provides automated code review and code-quality suggestions.
-- **GitHub Actions CI** performs a full test and build of the project. This validates dependency and version updates against the complete build process and verifies that the generated `dist/` bundle is clean, current, and consistent with the source. Changes that would leave `dist/` stale or invalid therefore fail CI rather than being merged.
+- **GitHub Actions CI** formats supported source, configuration, and documentation files, then performs a full test and build of the project. This validates dependency and version updates against the complete build process and verifies that the generated dist/ bundle is clean, current, and consistent with the source. Changes that would leave formatting inconsistent, or dist/ stale or invalid, therefore fail CI rather than being merged.
 
 The intended automation flow is:
 
