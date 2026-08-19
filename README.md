@@ -20,7 +20,7 @@ This means routine maintenance can be identified, tested, and validated continuo
 
 The goal is not simply to provide a working fork, but to provide a **maintained, actively tested, and continuously maintained version** of the action.
 
-> **Upstream:** [pascalgn/automerge-action](https://github.com/pascalgn/automerge-action)
+**Upstream:** [pascalgn/automerge-action](https://github.com/pascalgn/automerge-action)
 
 # automerge-action
 
