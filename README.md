@@ -88,7 +88,7 @@ jobs:
     steps:
       - id: automerge
         name: automerge
-        uses: "paulte/automerge-action@v1.0.0"
+        uses: "paulte/automerge-action@v1"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 ```
@@ -297,7 +297,7 @@ Example usage:
 steps:
   - id: automerge
     name: automerge
-    uses: "paulte/automerge-action@v1,0,0"
+    uses: "paulte/automerge-action@v1"
     env:
       GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
   - name: feedback
