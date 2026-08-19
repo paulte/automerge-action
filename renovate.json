@@ -18,6 +18,10 @@
 
   "dependencyDashboard": true,
 
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+
   "labels": [
     "dependencies"
   ],
