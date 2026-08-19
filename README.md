@@ -1,5 +1,4 @@
 [![CI](https://github.com/paulte/automerge-action/actions/workflows/ci.yaml/badge.svg)](https://github.com/paulte/automerge-action/actions/workflows/ci.yaml)
-[![CodeQL](https://github.com/paulte/automerge-action/actions/workflows/codeql.yml/badge.svg)](https://github.com/paulte/automerge-action/actions/workflows/codeql.yml)
 [![Renovate](https://img.shields.io/badge/Renovate-enabled-1a1a1a?logo=renovate)](https://github.com/renovatebot/renovate)
 [![Sourcery](https://img.shields.io/badge/reviewed%20by-Sourcery-9cf?logo=sourcery)](https://sourcery.ai/)
 
