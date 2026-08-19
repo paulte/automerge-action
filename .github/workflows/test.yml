@@ -28,8 +28,10 @@ jobs:
       - name: Run linting
         run: yarn lint
 
-      - name: Run tests
+      - name: Run debug
         run: yarn why @actions/core
+
+      - name: Run tests
         run: yarn test
 
       - name: Build
