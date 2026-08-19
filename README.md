@@ -1,3 +1,8 @@
+[![CI](https://github.com/paulte/automerge-action/actions/workflows/ci.yaml/badge.svg)](https://github.com/paulte/automerge-action/actions/workflows/ci.yaml)
+[![Renovate](https://img.shields.io/badge/Renovate-enabled-1a1a1a?logo=renovate)](https://github.com/renovatebot/renovate)
+[![Sourcery](https://img.shields.io/badge/reviewed%20by-Sourcery-9cf?logo=sourcery)](https://sourcery.ai/)
+
+
 # automerge-action
 
 GitHub action to automatically merge pull requests when they are ready.
@@ -318,6 +323,30 @@ URL="https://github.com/pascalgn/repository-name/pull/123"
 ```
 
 Install dependencies with `yarn`, and finally run `yarn it` (or `npm run it`).
+
+## Automation, Security & Dependency Management
+
+This repository is designed to automate the approval and maintenance of routine dependency updates while keeping appropriate safeguards around changes that require human judgement.
+
+- **Automated PR approval** — the action can automatically approve pull requests when they meet the configured criteria and all required checks pass. The repository also uses **itself** to automatically approve eligible pull requests, providing a real-world example of the action in use.
+- **Automated merging** — routine **minor dependency updates** may be automatically merged once all required checks have passed.
+- **Manual review for higher-risk changes** — major dependency updates are not automatically merged and require manual intervention.
+- **Failed CI stops automation** — a pull request that fails the required tests or other checks cannot be automatically approved or merged.
+- **Renovate** keeps project dependencies and GitHub Actions up to date and creates pull requests for available updates.
+- **Dependabot security updates** remain enabled through GitHub to identify and propose fixes for vulnerable dependencies.
+- **CodeQL** performs static security analysis to identify potential vulnerabilities.
+- **Sourcery** provides automated code review and code-quality suggestions.
+- **GitHub Actions CI** performs a full test and build of the project. This validates dependency and version updates against the complete build process and verifies that the generated `dist/` bundle is clean, current, and consistent with the source. Changes that would leave `dist/` stale or invalid therefore fail CI rather than being merged.
+
+The intended automation flow is:
+
+**Renovate → PR → full CI (test + build) → automated approval → automatic merge**
+
+For routine minor updates, this allows changes to be maintained without manual intervention while retaining clear safeguards:
+
+**CI failure → stop**
+
+**Major update → manual review**
 
 ## License
 
