@@ -2,7 +2,6 @@
 [![Renovate](https://img.shields.io/badge/Renovate-enabled-1a1a1a?logo=renovate)](https://github.com/renovatebot/renovate)
 [![Sourcery](https://img.shields.io/badge/reviewed%20by-Sourcery-9cf?logo=sourcery)](https://sourcery.ai/)
 
-
 # automerge-action
 
 GitHub action to automatically merge pull requests when they are ready.
@@ -34,7 +33,7 @@ After the pull request has been merged successfully, the branch will _not_ be
 deleted. To delete branches after they are merged,
 see [automatic deletion of branches](https://help.github.com/en/articles/managing-the-automatic-deletion-of-branches).
 
-----
+---
 
 **This functionality is now available directly in GitHub as [auto-merge](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/automatically-merging-a-pull-request).** Note that GitHub does not currently support auto-rebasing pull requests. The automerge-action project will still be maintained, but users are encouraged to switch to auto-merge for simple workflows, as it offers a faster and more stable experience.
 
@@ -226,38 +225,38 @@ Also, the following general options are supported:
 You can configure the environment variables in the workflow file like this:
 
 ```yaml
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          MERGE_LABELS: "automerge,!work in progress"
-          MERGE_REMOVE_LABELS: "automerge"
-          MERGE_METHOD: "squash"
-          MERGE_COMMIT_MESSAGE: "pull-request-description"
-          MERGE_FORKS: "false"
-          MERGE_RETRIES: "6"
-          MERGE_RETRY_SLEEP: "10000"
-          MERGE_REQUIRED_APPROVALS: "0"
-          UPDATE_LABELS: ""
-          UPDATE_METHOD: "rebase"
-          PULL_REQUEST: "1234"
-          MAX_PR_COUNT: "25"
+env:
+  GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  MERGE_LABELS: "automerge,!work in progress"
+  MERGE_REMOVE_LABELS: "automerge"
+  MERGE_METHOD: "squash"
+  MERGE_COMMIT_MESSAGE: "pull-request-description"
+  MERGE_FORKS: "false"
+  MERGE_RETRIES: "6"
+  MERGE_RETRY_SLEEP: "10000"
+  MERGE_REQUIRED_APPROVALS: "0"
+  UPDATE_LABELS: ""
+  UPDATE_METHOD: "rebase"
+  PULL_REQUEST: "1234"
+  MAX_PR_COUNT: "25"
 ```
 
 ## Supported Events
 
 Automerge can be configured to run for these events:
 
-* `check_run`
-* `check_suite`
-* `issue_comment`
-* `pull_request_review`
-* `pull_request_target`
-* `pull_request`
-* `push`
-* `repository_dispatch`
-* `schedule`
-* `status`
-* `workflow_dispatch`
-* `workflow_run`
+- `check_run`
+- `check_suite`
+- `issue_comment`
+- `pull_request_review`
+- `pull_request_target`
+- `pull_request`
+- `push`
+- `repository_dispatch`
+- `schedule`
+- `status`
+- `workflow_dispatch`
+- `workflow_run`
 
 For more information on when these occur, see the Github documentation on [events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows) and [their payloads](https://docs.github.com/en/developers/webhooks-and-events/webhook-events-and-payloads).
 
@@ -265,8 +264,8 @@ For more information on when these occur, see the Github documentation on [event
 
 The action will provide two [outputs](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idoutputs):
 
-* `mergeResult` - The result from the action run, one of `skipped`, `not_ready`, `author_filtered`, `merge_failed`, `merged`
-* `pullRequestNumber` - The pull request number (or `0`, if no pull request was affected)
+- `mergeResult` - The result from the action run, one of `skipped`, `not_ready`, `author_filtered`, `merge_failed`, `merged`
+- `pullRequestNumber` - The pull request number (or `0`, if no pull request was affected)
 
 Please note:
 
@@ -277,16 +276,16 @@ Please note:
 Example usage:
 
 ```yaml
-    steps:
-      - id: automerge
-        name: automerge
-        uses: "pascalgn/automerge-action@v0.15.6"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      - name: feedback
-        if: ${{ steps.automerge.outputs.mergeResult == 'merged' }}
-        run: |
-          echo "Pull request ${{ steps.automerge.outputs.pullRequestNumber }} merged!"
+steps:
+  - id: automerge
+    name: automerge
+    uses: "pascalgn/automerge-action@v0.15.6"
+    env:
+      GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  - name: feedback
+    if: ${{ steps.automerge.outputs.mergeResult == 'merged' }}
+    run: |
+      echo "Pull request ${{ steps.automerge.outputs.pullRequestNumber }} merged!"
 ```
 
 ## Limitations
@@ -304,11 +303,11 @@ Example usage:
 To run the action with full debug logging, update your workflow file as follows:
 
 ```yaml
-      - name: automerge
-        uses: pascalgn/automerge-action@...
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          LOG: "TRACE"  # or "DEBUG"
+- name: automerge
+  uses: pascalgn/automerge-action@...
+  env:
+    GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+    LOG: "TRACE" # or "DEBUG"
 ```
 
 If you need to further debug the action, you can run it locally.
@@ -336,7 +335,7 @@ This repository is designed to automate the approval and maintenance of routine 
 - **Dependabot security updates** remain enabled through GitHub to identify and propose fixes for vulnerable dependencies.
 - **CodeQL** performs static security analysis to identify potential vulnerabilities.
 - **Sourcery** provides automated code review and code-quality suggestions.
-- **GitHub Actions CI** performs a full test and build of the project. This validates dependency and version updates against the complete build process and verifies that the generated `dist/` bundle is clean, current, and consistent with the source. Changes that would leave `dist/` stale or invalid therefore fail CI rather than being merged.
+- **GitHub Actions CI** formats supported source, configuration, and documentation files, then performs a full test and build of the project. This validates dependency and version updates against the complete build process and verifies that the generated dist/ bundle is clean, current, and consistent with the source. Changes that would leave formatting inconsistent, or dist/ stale or invalid, therefore fail CI rather than being merged.
 
 The intended automation flow is:
 

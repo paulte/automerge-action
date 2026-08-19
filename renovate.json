@@ -1,16 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
 
-  "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests"
-  ],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
 
-  "enabledManagers": [
-    "npm",
-    "github-actions",
-    "pre-commit"
-  ],
+  "enabledManagers": ["npm", "github-actions", "pre-commit"],
 
   "pre-commit": {
     "enabled": true
@@ -22,25 +15,16 @@
     "enabled": true
   },
 
-  "labels": [
-    "dependencies"
-  ],
+  "labels": ["dependencies"],
 
   "packageRules": [
     {
       "description": "Automerge non-major dependency updates",
-      "matchUpdateTypes": [
-        "patch",
-        "minor",
-        "digest",
-        "pinDigest"
-      ],
+      "matchUpdateTypes": ["patch", "minor", "digest", "pinDigest"],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": false,
-      "addLabels": [
-        "automerge"
-      ]
+      "addLabels": ["automerge"]
     }
   ]
 }
