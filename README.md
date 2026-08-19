@@ -70,12 +70,12 @@ jobs:
     steps:
       - id: automerge
         name: automerge
-        uses: "pascalgn/automerge-action@v0.16.4"
+        uses: "paulte/automerge-action@v1.0.0"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 ```
 
-For the latest version, see the [list of releases](https://github.com/pascalgn/automerge-action/releases).
+For the latest version, see the [list of releases](https://github.com/paulte/automerge-action/releases).
 
 ## Configuration
 
@@ -279,7 +279,7 @@ Example usage:
 steps:
   - id: automerge
     name: automerge
-    uses: "pascalgn/automerge-action@v0.15.6"
+    uses: "paulte/automerge-action@v1,0,0"
     env:
       GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
   - name: feedback
@@ -304,7 +304,7 @@ To run the action with full debug logging, update your workflow file as follows:
 
 ```yaml
 - name: automerge
-  uses: pascalgn/automerge-action@...
+  uses: paulte/automerge-action@...
   env:
     GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     LOG: "TRACE" # or "DEBUG"
