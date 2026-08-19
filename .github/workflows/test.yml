@@ -28,9 +28,12 @@ jobs:
       - name: Run linting
         run: yarn lint
 
-      - name: Run debug
-        run: yarn why @actions/core
-
+      - name: Debug ESLint dependencies
+        run: |
+          yarn why @eslint/js
+          ls -la node_modules/@eslint/js
+          node -p "require.resolve('@eslint/js')"
+    
       - name: Run tests
         run: yarn test
 
