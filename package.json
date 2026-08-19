@@ -25,6 +25,7 @@
     "tmp": "^0.2.3"
   },
   "devDependencies": {
+    "@eslint/js": "^10.8.0",
     "@vercel/ncc": "^0.45.0",
     "dotenv": "^17.4.2",
     "eslint": "^10.0.0",
