@@ -53,7 +53,8 @@ jobs:
             "lib/**/*.js" \
             "test/**/*.js" \
             "**/*.{json,yml,yaml,md}" \
-            "!dist/**"
+            "!dist/**"  \
+            "!.github/workflows/**
 
       - name: Build
         run: yarn compile
@@ -103,7 +104,8 @@ jobs:
             "lib/**/*.js" \
             "test/**/*.js" \
             "**/*.{json,yml,yaml,md}" \
-            "!dist/**"
+            "!dist/**" \
+            "!.github/workflows/**
 
       - name: Run linting
         run: yarn lint
