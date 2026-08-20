@@ -20,11 +20,15 @@ jobs:
   prepare:
     name: Format and build
     if: >
+      github.event_name == 'workflow_dispatch' ||
       (
         github.event_name == 'push' &&
         github.ref == 'refs/heads/main'
       ) ||
-      github.event_name == 'workflow_dispatch'
+      (
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -65,7 +69,12 @@ jobs:
             echo "No generated changes to commit."
           else
             git commit -m "chore: format and build"
-            git push origin HEAD:${{ github.ref_name }}
+
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              git push origin HEAD:${{ github.head_ref }}
+            else
+              git push origin HEAD:main
+            fi
           fi
 
   verify:
