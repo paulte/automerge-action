@@ -53,7 +53,7 @@ jobs:
             "lib/**/*.js" \
             "test/**/*.js" \
             "**/*.{json,yml,yaml,md}" \
-            "!dist/**"  \
+            "!dist/**" \
             "!.github/workflows/**"
 
       - name: Build
