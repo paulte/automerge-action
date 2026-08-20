@@ -65,7 +65,7 @@ jobs:
             echo "No generated changes to commit."
           else
             git commit -m "chore: format and build"
-            git push origin HEAD:main
+            git push origin HEAD:${{ github.ref_name }}
           fi
 
   verify:
