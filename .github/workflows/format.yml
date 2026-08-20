@@ -37,17 +37,14 @@ jobs:
 
       - name: Format source
         run: |
-          prettier --no-config --write \
-            --trailing-comma none \
-            --arrow-parens avoid \
-            "lib/**/*.js" \
-            "test/**/*.js" \
-            "**/*.json" \
-            "**/*.yml" \
-            "**/*.md" \
-            "!dist/**" \
-            "!.github/workflows/**"
-
+                - name: Format source
+        run: |
+          set -euo pipefail
+          git ls-files -z |
+            grep -zE '\.(js|json|yml|yaml|md)$' |
+            grep -zvE '^(dist/|\.github/workflows/)' |
+            xargs -0 prettier --write
+            
       - name: Commit formatting changes
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         env:
