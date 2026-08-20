@@ -118,6 +118,3 @@ jobs:
 
       - name: Check compiled output
         run: git diff --exit-code -- dist/
-
-      - name: Check debug
-        run: yarn why undici
