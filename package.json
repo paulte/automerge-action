@@ -34,9 +34,6 @@
     "jest": "^30.4.2",
     "prettier": "^3.2.5"
   },
-  "resolutions": {
-    "@actions/http-client": "^4.0.1"
-  },
   "prettier": {
     "trailingComma": "none",
     "arrowParens": "avoid"
