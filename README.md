@@ -89,7 +89,7 @@ jobs:
     steps:
       - id: automerge
         name: automerge
-        uses: "paulte/automerge-action@v1"
+        uses: paulte/automerge-action@main
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 ```
