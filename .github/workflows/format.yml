@@ -37,18 +37,18 @@ jobs:
 
       - name: Format source
         run: |
-                - name: Format source
-        run: |
           set -euo pipefail
+
           git ls-files -z |
             grep -zE '\.(js|json|yml|yaml|md)$' |
             grep -zvE '^(dist/|\.github/workflows/)' |
             xargs -0 prettier --write
-            
+
       - name: Commit formatting changes
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
@@ -62,6 +62,8 @@ jobs:
             '**/*.json' \
             '*.yml' \
             '**/*.yml' \
+            '*.yaml' \
+            '**/*.yaml' \
             '*.md' \
             '**/*.md'
 
