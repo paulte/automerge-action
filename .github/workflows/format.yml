@@ -55,17 +55,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add \
-            'lib/**/*.js' \
-            'test/**/*.js' \
-            '*.json' \
-            '**/*.json' \
-            '*.yml' \
-            '**/*.yml' \
-            '*.yaml' \
-            '**/*.yaml' \
-            '*.md' \
-            '**/*.md'
+          git add -A
 
           if git diff --cached --quiet; then
             echo "No formatting changes required."
