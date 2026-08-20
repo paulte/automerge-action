@@ -35,7 +35,7 @@
     "prettier": "^3.2.5"
   },
   "resolutions": {
-    "picomatch": "^2.3.2"
+    "picomatch": "^4.0.0"
   },
   "prettier": {
     "trailingComma": "none",
