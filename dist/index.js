@@ -799,7 +799,7 @@ class ExitError extends Error {
   }
 }
 
-const FETCH_DEPTH = 15;
+const FETCH_DEPTH = 20;
 
 const COMMON_ARGS = [
   "-c",
