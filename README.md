@@ -1,6 +1,7 @@
 [![CI](https://github.com/paulte/automerge-action/actions/workflows/ci.yaml/badge.svg)](https://github.com/paulte/automerge-action/actions/workflows/ci.yaml)
 [![Renovate](https://img.shields.io/badge/Renovate-enabled-1a1a1a?logo=renovate)](https://github.com/renovatebot/renovate)
 [![Sourcery](https://img.shields.io/badge/reviewed%20by-Sourcery-9cf?logo=sourcery)](https://sourcery.ai/)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/paulte/automerge-action/badge)](https://scorecard.dev/viewer/?uri=github.com/paulte/automerge-action)
 
 ## About this project
 
