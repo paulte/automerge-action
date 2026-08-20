@@ -24,7 +24,7 @@ The goal is not simply to provide a working fork, but to provide a **maintained,
 
 GitHub action to automatically merge pull requests when they are ready.
 
-<img src="https://pascalgn.github.io/automerge-action/screenshot.svg" width="100%">
+<img src="https://paulte.github.io/automerge-action/screenshot.svg" width="100%">
 
 When added, this action will run the following tasks on pull requests with the
 `automerge` label:
