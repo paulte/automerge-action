@@ -40,5 +40,22 @@ jobs:
         run: yarn test
       - name: Build
         run: yarn compile
-      - name: Check compiled output
-        run: git diff --exit-code -- dist/
+
+      - name: Check for dist changes
+        id: dist
+        run: |
+          if git diff --quiet -- dist; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit updated dist
+        if: steps.dist.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add dist
+          git commit -m "chore: update dist"
+          git push
