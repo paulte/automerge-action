@@ -32,9 +32,11 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install Prettier
-        run: npm install --global prettier@3.6.2
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+        
 
+        
       - name: Format source
         run: |
           set -euo pipefail
