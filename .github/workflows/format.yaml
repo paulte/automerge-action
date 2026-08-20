@@ -1,0 +1,150 @@
+name: Format
+
+on:
+  push:
+    branches:
+      - main
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: format-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Format source
+    runs-on: ubuntu-latest
+
+    # Never attempt to write to a fork.
+    if: >
+      github.event_name != 'pull_request_target' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout trusted formatter
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+          cache: yarn
+
+      - name: Install trusted dependencies
+        run: yarn install --ignore-scripts
+
+      - name: Prepare source
+        env:
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+
+          rm -rf "$RUNNER_TEMP/pr-source"
+
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            git fetch --no-tags origin "$PR_SHA"
+            git archive "$PR_SHA" | tar -x -C "$RUNNER_TEMP"
+
+            SOURCE_DIR="$(find "$RUNNER_TEMP" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+            mv "$SOURCE_DIR" "$RUNNER_TEMP/pr-source"
+          else
+            git archive HEAD | tar -x -C "$RUNNER_TEMP"
+            mkdir -p "$RUNNER_TEMP/pr-source"
+            find "$RUNNER_TEMP" \
+              -mindepth 1 \
+              -maxdepth 1 \
+              ! -name pr-source \
+              -exec mv {} "$RUNNER_TEMP/pr-source/" \;
+          fi
+
+      - name: Format source
+        working-directory: ${{ runner.temp }}/pr-source
+        run: |
+          yarn --cwd "$GITHUB_WORKSPACE" prettier --write \
+            "lib/**/*.js" \
+            "test/**/*.js" \
+            "**/*.{json,yml,yaml,md}" \
+            "!dist/**" \
+            "!.github/workflows/**"
+
+      - name: Check for formatting changes
+        working-directory: ${{ runner.temp }}/pr-source
+        run: |
+          if git diff --no-index --quiet \
+            "$GITHUB_WORKSPACE" \
+            "${{ runner.temp }}/pr-source"; then
+            echo "No formatting changes required."
+          else
+            echo "Formatting changes are required."
+          fi
+
+      - name: Create formatted commit
+        if: github.event_name == 'pull_request_target'
+        env:
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
+        working-directory: ${{ runner.temp }}/pr-source
+        run: |
+          set -euo pipefail
+
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No formatting changes required."
+            exit 0
+          fi
+
+          TREE="$(git write-tree)"
+
+          COMMIT="$(printf '%s\n\n' 'chore: format source' | \
+            git commit-tree "$TREE" -p "$PR_SHA")"
+
+          echo "Created formatted commit: $COMMIT"
+
+          git push \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$COMMIT:refs/heads/${TARGET_BRANCH}"
+
+      - name: Create formatted main commit
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        working-directory: ${{ runner.temp }}/pr-source
+        run: |
+          set -euo pipefail
+
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No formatting changes required."
+            exit 0
+          fi
+
+          TREE="$(git write-tree)"
+
+          COMMIT="$(printf '%s\n\n' 'chore: format source' | \
+            git commit-tree "$TREE" -p '${{ github.sha }}')"
+
+          echo "Created formatted commit: $COMMIT"
+
+          git push \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$COMMIT:refs/heads/main"
