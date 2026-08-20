@@ -55,25 +55,25 @@ jobs:
       - name: Build
         run: yarn compile
 
-      - name: Check for dist changes
-        id: dist
+      - name: Check for changes
+        id: changes
         run: |
-          if git diff --quiet -- dist; then
+          if git diff --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
-          
-      - name: Commit updated dist
+
+      - name: Commit updated files
         if: >
           github.event_name == 'pull_request' &&
           github.event.pull_request.head.repo.full_name == github.repository &&
-          steps.dist.outputs.changed == 'true'
+          steps.changes.outputs.changed == 'true'
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dist
-          git commit -m "chore: update dist"
+          git add -A
+          git commit -m "chore: format and update dist"
           git push origin "HEAD:${TARGET_BRANCH}"
