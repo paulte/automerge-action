@@ -15,7 +15,7 @@ If you are using an older release, please upgrade to the latest version before r
 
 Please **do not report security vulnerabilities through public GitHub issues, pull requests, or discussions**.
 
-Use GitHub's **Private Vulnerability Reporting** or **Security Advisories** to report a vulnerability privately.
+Use GitHub's **Private Vulnerability Reporting** or **Security Advisories** to report a vulnerability privately: https://github.com/paulte/automerge-action/security/advisories?state=Triage
 
 When reporting a vulnerability, please include:
 
