@@ -19,7 +19,9 @@ on:
       - completed
   status: {}
 
-permissions: read
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   automerge:
