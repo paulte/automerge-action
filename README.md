@@ -2,6 +2,7 @@
 [![Renovate](https://img.shields.io/badge/Renovate-enabled-1a1a1a?logo=renovate)](https://github.com/renovatebot/renovate)
 [![Sourcery](https://img.shields.io/badge/reviewed%20by-Sourcery-9cf?logo=sourcery)](https://sourcery.ai/)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/paulte/automerge-action/badge)](https://scorecard.dev/viewer/?uri=github.com/paulte/automerge-action)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/14189/badge)](https://www.bestpractices.dev/projects/14189)
 
 ## About this project
 
