@@ -4,10 +4,10 @@
 
 Security updates are provided for the latest release of `automerge-action`.
 
-| Version | Supported |
-| --- | --- |
-| Latest release | Yes |
-| Older releases | No |
+| Version        | Supported |
+| -------------- | --------- |
+| Latest release | Yes       |
+| Older releases | No        |
 
 If you are using an older release, please upgrade to the latest version before reporting a vulnerability.
 
