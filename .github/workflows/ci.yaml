@@ -57,11 +57,6 @@ jobs:
       - name: Build
         run: yarn compile
 
-      - name: Debug
-        run: |             
-          yarn why cross-spawn
-          yarn why minimatch
-
       - name: Check for changes
         id: changes
         run: |
