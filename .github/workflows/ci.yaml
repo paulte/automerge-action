@@ -59,7 +59,7 @@ jobs:
 
       - name: Debug
         run: |             
-          why cross-spawn
+          yarn why cross-spawn
           yarn why minimatch
 
       - name: Check for changes
