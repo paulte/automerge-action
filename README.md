@@ -8,19 +8,51 @@
 
 This project is a maintained continuation of [pascalgn/automerge-action](https://github.com/pascalgn/automerge-action).
 
-The upstream project has not received substantive maintenance for approximately two years. This project exists to provide a maintained version of the action that can continue to receive dependency updates, security fixes, bug fixes, and compatibility updates.
+The upstream project has not received substantive maintenance since late 2024. This project exists to provide a maintained version of the action that can continue to receive dependency updates, security fixes, bug fixes, and compatibility updates.
 
 This project started as a fork of the original MIT-licensed project and retains the original licensing and attribution. It is now maintained independently, with the aim of remaining compatible with the original project's behaviour while providing an actively maintained version for users who need a dependable GitHub Action.
 
-### Automation by design
+### Automation, Security & Dependency Management
 
 Automation is central to both the purpose of this action and the way this repository is maintained.
 
-The action automates the merging of suitable pull requests. The repository applies the same principle to its own maintenance: dependency and GitHub Action updates are monitored automatically, changes are tested and built by CI, and the generated `dist/` bundle is validated to ensure it remains current and consistent with the source.
+The action evaluates approval requirements and merges suitable pull requests. The repository applies the same principle to its own maintenance: dependency and GitHub Action updates are monitored automatically, changes are tested, security-checked and built by CI, and the generated `dist/` bundle is validated to ensure it remains current and consistent with the source.
 
-This means routine maintenance can be identified, tested, and validated continuously rather than relying solely on manual intervention.
+The goal is to automate routine, low-risk maintenance without weakening the controls applied to changes. Automatic merging is therefore conditional on all required checks passing; automation does not bypass the repository's security, quality or review requirements.
 
-The goal is not simply to provide a working fork, but to provide a **maintained, actively tested, and continuously maintained version** of the action.
+- **Approval requirements** — the action evaluates whether pull requests meet the configured criteria and all required checks pass before merging eligible pull requests. The repository also uses **itself** to automatically merge eligible pull requests, providing a real-world example of the action in use.
+- **Automated merging** — routine **non-major dependency updates** may be automatically merged. This includes patch and minor dependency updates, GitHub Action digest updates, and dependency pinning updates. These updates are only eligible for automatic merging when all required checks have passed.
+- **Manual review for higher-risk changes** — major dependency updates are not automatically merged and require manual intervention. Changes that fail validation, introduce security concerns, require significant configuration changes, or otherwise cannot satisfy the repository's merge requirements also require manual intervention.
+- **Security and quality gates** — automated updates are subject to the same required security and quality checks as other changes. Automatic merging does not bypass CI, security scanning, dependency checks, or other required repository protections.
+- **Failed checks stop automation** — a pull request that fails any required test, build, security, quality, or other repository check cannot be automatically merged.
+- **Renovate** keeps project dependencies and GitHub Actions up to date and creates pull requests for available updates.
+- **Dependabot security updates** remain enabled through GitHub to identify and propose fixes for vulnerable dependencies.
+- **CodeQL** performs static security analysis to identify potential vulnerabilities.
+- **OSSF Scorecard** evaluates aspects of the repository's software supply-chain security and development practices.
+- **OSV-Scanner** scans dependencies for known vulnerabilities.
+- **Sourcery** provides automated code review and code-quality suggestions.
+- **GitHub Actions CI** formats supported source, configuration, and documentation files, then performs a full test and build of the project. It also verifies that the generated `dist/` bundle is clean, current, and consistent with the source. Changes that would leave formatting inconsistent or `dist/` stale or invalid therefore fail CI rather than being merged.
+
+This creates a largely automated maintenance flow:
+
+1. **Updates are detected automatically** by Renovate and GitHub's security tooling.
+2. **A pull request is created** containing the proposed dependency or GitHub Action update.
+3. **The change is validated automatically** through tests, formatting, builds, dependency and security checks, and other required quality gates.
+4. **Low-risk, non-major updates may be merged automatically** when every required check passes.
+5. **Higher-risk or non-compliant changes stop the automation** and require manual intervention.
+6. **The resulting project is continuously checked** to ensure that its source, generated `dist/` bundle, dependencies, workflows, and security posture remain consistent.
+
+The result is a repository that can maintain itself for routine changes while retaining explicit safeguards around security, correctness, and higher-risk changes.
+
+**Renovate → PR → full CI (test + build) → approval requirements evaluated → automatic merge**
+
+For routine minor updates, this allows changes to be maintained without manual intervention while retaining clear safeguards:
+
+**CI failure → stop**
+
+**Major update → manual review**
+
+The goal is not simply to provide a working fork, but to provide a **maintained, actively tested, and continuously validated version** of the action.
 
 # automerge-action
 
@@ -342,30 +374,6 @@ URL="https://github.com/pascalgn/repository-name/pull/123"
 ```
 
 Install dependencies with `yarn`, and finally run `yarn it` (or `npm run it`).
-
-## Automation, Security & Dependency Management
-
-This repository is designed to automate the approval and maintenance of routine dependency updates while keeping appropriate safeguards around changes that require human judgement.
-
-- **Automated PR approval** — the action can automatically approve pull requests when they meet the configured criteria and all required checks pass. The repository also uses **itself** to automatically approve eligible pull requests, providing a real-world example of the action in use.
-- **Automated merging** — routine **minor dependency updates** may be automatically merged once all required checks have passed.
-- **Manual review for higher-risk changes** — major dependency updates are not automatically merged and require manual intervention.
-- **Failed CI stops automation** — a pull request that fails the required tests or other checks cannot be automatically approved or merged.
-- **Renovate** keeps project dependencies and GitHub Actions up to date and creates pull requests for available updates.
-- **Dependabot security updates** remain enabled through GitHub to identify and propose fixes for vulnerable dependencies.
-- **CodeQL** performs static security analysis to identify potential vulnerabilities.
-- **Sourcery** provides automated code review and code-quality suggestions.
-- **GitHub Actions CI** formats supported source, configuration, and documentation files, then performs a full test and build of the project. This validates dependency and version updates against the complete build process and verifies that the generated dist/ bundle is clean, current, and consistent with the source. Changes that would leave formatting inconsistent, or dist/ stale or invalid, therefore fail CI rather than being merged.
-
-The intended automation flow is:
-
-**Renovate → PR → full CI (test + build) → automated approval → automatic merge**
-
-For routine minor updates, this allows changes to be maintained without manual intervention while retaining clear safeguards:
-
-**CI failure → stop**
-
-**Major update → manual review**
 
 ## License
 
