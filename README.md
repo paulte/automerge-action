@@ -17,6 +17,7 @@ This project started as a fork of the original MIT-licensed project and retains 
 Automation is central to both the purpose of this action and the way this repository is maintained.
 
 The action evaluates approval requirements and merges suitable pull requests. The repository applies the same principle to its own maintenance: dependency and GitHub Action updates are monitored automatically, changes are tested and built by CI, and the generated `dist/` bundle is validated to ensure it remains current and consistent with the source.
+
 - **Approval requirements** — the action evaluates whether pull requests meet the configured criteria and all required checks pass before merging eligible pull requests. The repository also uses **itself** to automatically merge eligible pull requests, providing a real-world example of the action in use.
 - **Automated merging** — routine **minor dependency updates** may be automatically merged once all required checks have passed.
 - **Manual review for higher-risk changes** — major dependency updates are not automatically merged and require manual intervention.
@@ -26,7 +27,7 @@ The action evaluates approval requirements and merges suitable pull requests. Th
 - **CodeQL** performs static security analysis to identify potential vulnerabilities.
 - **Sourcery** provides automated code review and code-quality suggestions.
 - **GitHub Actions CI** formats supported source, configuration, and documentation files, then performs a full test and build of the project. It also verifies that the generated `dist/` bundle is clean, current, and consistent with the source. Changes that would leave formatting inconsistent or `dist/` stale or invalid therefore fail CI rather than being merged.
-This creates a largely automated maintenance flow:
+  This creates a largely automated maintenance flow:
 
 **Renovate → PR → full CI (test + build) → approval requirements evaluated → automatic merge**
 
