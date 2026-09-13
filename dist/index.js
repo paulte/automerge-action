@@ -7069,7 +7069,9 @@ const _ExtendAction = _callable(class _ExtendAction extends _AppendAction {
     call (parser, namespace, values/*, option_string = undefined */) {
         let items = getattr(namespace, this.dest, undefined)
         items = _copy_items(items)
-        items = items.concat(values)
+        for (const value of values) {
+            items.push(value)
+        }
         setattr(namespace, this.dest, items)
     }
 })
@@ -7877,9 +7879,23 @@ const ArgumentParser = _callable(class ArgumentParser extends _AttributeHolder(_
             if (!Number.isInteger(result)) {
                 throw new TypeError(sub('could not convert string to int: %r', x))
             }
-            return result
+            // python integers have no negative zero
+            return result === 0 ? 0 : result
         })
         this.register('type', 'float', function (x) {
+            if (typeof x === 'string') {
+                const value = x.trim().toLowerCase()
+                // Number() knows neither spelling
+                if (/^[+-]?nan$/.test(value)) return NaN
+                if (/^[+-]?inf(?:inity)?$/.test(value)) {
+                    return value[0] === '-' ? -Infinity : Infinity
+                }
+                // python's float() grammar: PEP 515 underscores, optional exponent
+                const number = /^[+-]?(\d+(_\d+)*(\.(\d+(_\d+)*)?)?|\.\d+(_\d+)*)(e[+-]?\d+(_\d+)*)?$/
+                if (!number.test(value)) {
+                    throw new TypeError(sub('could not convert string to float: %r', x))
+                }
+            }
             const result = _string_to_number(x)
             if (isNaN(result)) {
                 throw new TypeError(sub('could not convert string to float: %r', x))
