@@ -10112,7 +10112,8 @@ const emptyDir = u(async function emptyDir (dir) {
   let items
   try {
     items = await fs.readdir(dir)
-  } catch {
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
     return mkdir.mkdirs(dir)
   }
 
@@ -10123,7 +10124,8 @@ function emptyDirSync (dir) {
   let items
   try {
     items = fs.readdirSync(dir)
-  } catch {
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
     return mkdir.mkdirsSync(dir)
   }
 
@@ -11246,7 +11248,7 @@ async function checkPaths (src, dest, funcName, opts) {
       const destBaseName = path.basename(dest)
       if (funcName === 'move' &&
         srcBaseName !== destBaseName &&
-        srcBaseName.toLowerCase() === destBaseName.toLowerCase()) {
+        isCosmeticRename(srcBaseName, destBaseName)) {
         return { srcStat, destStat, isChangingCase: true }
       }
       throw new Error('Source and destination must not be the same.')
@@ -11275,7 +11277,7 @@ function checkPathsSync (src, dest, funcName, opts) {
       const destBaseName = path.basename(dest)
       if (funcName === 'move' &&
         srcBaseName !== destBaseName &&
-        srcBaseName.toLowerCase() === destBaseName.toLowerCase()) {
+        isCosmeticRename(srcBaseName, destBaseName)) {
         return { srcStat, destStat, isChangingCase: true }
       }
       throw new Error('Source and destination must not be the same.')
@@ -11292,6 +11294,16 @@ function checkPathsSync (src, dest, funcName, opts) {
     throw new Error(errMsg(src, dest, funcName))
   }
   return { srcStat, destStat }
+}
+
+// True when src and dest refer to the same inode and their basenames only
+// differ in letter case or Unicode normalization form. Some filesystems
+// (APFS, most Windows filesystems) silently normalize case and/or Unicode
+// representation, so a rename that looks like a no-op string-wise is
+// actually the user renaming a file to a visually-identical but
+// differently-encoded name, not a genuine "same path" error.
+function isCosmeticRename (srcBaseName, destBaseName) {
+  return srcBaseName.toLowerCase().normalize('NFC') === destBaseName.toLowerCase().normalize('NFC')
 }
 
 // recursively check if dest parent is a subdirectory of src.
@@ -12490,14 +12502,14 @@ function writeFileSync (file, obj, options = {}) {
   return fs.writeFileSync(file, str, options)
 }
 
-const jsonfile = {
+// NOTE: do not change this export format; required for ESM compat
+// see https://github.com/jprichardson/node-jsonfile/pull/162 for details
+module.exports = {
   readFile,
   readFileSync,
   writeFile,
   writeFileSync
 }
-
-module.exports = jsonfile
 
 
 /***/ }),
@@ -12508,6 +12520,10 @@ module.exports = jsonfile
 function stringify (obj, { EOL = '\n', finalEOL = true, replacer = null, spaces } = {}) {
   const EOF = finalEOL ? EOL : ''
   const str = JSON.stringify(obj, replacer, spaces)
+
+  if (str === undefined) {
+    throw new TypeError(`Converting ${typeof obj} value to JSON is not supported`)
+  }
 
   return str.replace(/\n/g, EOL) + EOF
 }
